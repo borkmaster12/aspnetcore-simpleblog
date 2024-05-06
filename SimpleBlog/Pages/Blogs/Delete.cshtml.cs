@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using SimpleBlog.Models;
 
 namespace SimpleBlog.Pages.Blogs
 {
+    [Authorize]
     public class DeleteModel : PageModel
     {
         private readonly SimpleBlog.Data.SimpleBlogContext _context;
@@ -30,10 +33,16 @@ namespace SimpleBlog.Pages.Blogs
             {
                 return NotFound();
             }
-            else
+
+            var userIdClaim = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int.TryParse(userIdClaim, out var currentUserId);
+
+            if (blog.AuthorId != currentUserId)
             {
-                Blog = blog;
+                return Forbid();
             }
+
+            Blog = blog;
             return Page();
         }
 
@@ -45,12 +54,23 @@ namespace SimpleBlog.Pages.Blogs
             }
 
             var blog = await _context.Blogs.FindAsync(id);
-            if (blog != null)
+
+            if (blog == null)
             {
-                Blog = blog;
-                _context.Blogs.Remove(Blog);
-                await _context.SaveChangesAsync();
+                return NotFound();
             }
+
+            var userIdClaim = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int.TryParse(userIdClaim, out var currentUserId);
+
+            if (blog.AuthorId != currentUserId)
+            {
+                return Forbid();
+            }
+
+            Blog = blog;
+            _context.Blogs.Remove(Blog);
+            await _context.SaveChangesAsync();
 
             return RedirectToPage("./Index");
         }
