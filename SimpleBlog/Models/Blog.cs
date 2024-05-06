@@ -16,7 +16,10 @@ namespace SimpleBlog.Models
         [Required]
         public string Content { get; set; } = default!;
 
+        [Display(Name = "Created")]
         public DateTimeOffset CreatedDate { get; set; }
+
+        [Display(Name = "Updated")]
         public DateTimeOffset? LastUpdatedDate { get; set; }
 
         [ForeignKey(nameof(AuthorId))]

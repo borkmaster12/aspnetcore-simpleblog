@@ -14,34 +14,41 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Blog[0].Title)
+                @Html.DisplayNameFor(model => model.Blogs[0].AuthorName)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Blog[0].Content)
+                @Html.DisplayNameFor(model => model.Blogs[0].Title)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Blog[0].CreatedDate)
+                @Html.DisplayNameFor(model => model.Blogs[0].CreatedDate)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Blog[0].LastUpdatedDate)
+                @Html.DisplayNameFor(model => model.Blogs[0].LastUpdatedDate)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model.Blog) {
+@foreach (var item in Model.Blogs) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Title)
+                @Html.DisplayFor(modelItem => item.AuthorName)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Content)
+                @Html.DisplayFor(modelItem => item.Title)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.CreatedDate)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.LastUpdatedDate)
+                    @if (item.LastUpdatedDate is not null)
+                    {
+                        @Html.DisplayFor(modelItem => item.LastUpdatedDate)
+                    }
+                    else
+                    {
+                        <text>Never</text>
+                    }
             </td>
             <td>
                 <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
