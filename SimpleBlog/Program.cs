@@ -1,12 +1,23 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
 using SimpleBlog.Data;
+using SimpleBlog.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddDbContext<SimpleBlogContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("SimpleBlogContext") ?? throw new InvalidOperationException("Connection string 'SimpleBlogContext' not found.")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("SimpleBlogContext")
+            ?? throw new InvalidOperationException(
+                "Connection string 'SimpleBlogContext' not found."
+            )
+    )
+);
+
+builder
+    .Services.AddDefaultIdentity<BlogUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<SimpleBlogContext>();
 
 var app = builder.Build();
 

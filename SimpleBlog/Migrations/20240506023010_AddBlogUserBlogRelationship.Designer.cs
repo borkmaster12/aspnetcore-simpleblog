@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SimpleBlog.Data;
 
@@ -11,9 +12,11 @@ using SimpleBlog.Data;
 namespace SimpleBlog.Migrations
 {
     [DbContext(typeof(SimpleBlogContext))]
-    partial class SimpleBlogContextModelSnapshot : ModelSnapshot
+    [Migration("20240506023010_AddBlogUserBlogRelationship")]
+    partial class AddBlogUserBlogRelationship
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
