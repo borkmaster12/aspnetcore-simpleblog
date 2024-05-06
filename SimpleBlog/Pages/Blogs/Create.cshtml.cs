@@ -1,3 +1,4 @@
+using System.Security.Claims;
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SimpleBlog.Models;
@@ -14,7 +15,9 @@ namespace SimpleBlog.Pages.Blogs
         }
 
         [BindProperty]
-        public Blog Blog { get; set; } = default!;
+        public InputModel Input { get; set; } = default!;
+
+        public Blog? Blog { get; set; }
 
         public IActionResult OnGet()
         {
@@ -29,10 +32,27 @@ namespace SimpleBlog.Pages.Blogs
                 return Page();
             }
 
+            Blog = new Blog
+            {
+                AuthorId = int.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)!.Value),
+                Title = Input.Title,
+                Content = Input.Content,
+                CreatedDate = DateTimeOffset.Now
+            };
+
             _context.Blogs.Add(Blog);
             await _context.SaveChangesAsync();
 
             return RedirectToPage("./Index");
+        }
+
+        public class InputModel
+        {
+            [Required]
+            public string Title { get; set; } = default!;
+
+            [Required]
+            public string Content { get; set; } = default!;
         }
     }
 }
