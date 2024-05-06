@@ -1,8 +1,10 @@
 ﻿@page
+@using System.Security.Claims
 @model SimpleBlog.Pages.Blogs.IndexModel
 
 @{
     ViewData["Title"] = "Index";
+    int.TryParse(HttpContext.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var currentUserId);
 }
 
 <h1>Index</h1>
@@ -51,9 +53,14 @@
                     }
             </td>
             <td>
-                <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-page="./Details" asp-route-id="@item.Id">Details</a> 
+                @if (currentUserId == item.AuthorId)
+                {
+                <text> | </text>
+                <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a>
+                <text> | </text>
                 <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
+                }
             </td>
         </tr>
 }

@@ -22,6 +22,7 @@ namespace SimpleBlog.Pages.Blogs
                 .Select(blog => new OutputModel
                 {
                     Id = blog.Id,
+                    AuthorId = blog.AuthorId,
                     Title = blog.Title,
                     AuthorName = blog.Author!.UserName ?? string.Empty,
                     CreatedDate = blog.CreatedDate,
@@ -33,6 +34,8 @@ namespace SimpleBlog.Pages.Blogs
         public class OutputModel
         {
             public int Id { get; set; }
+
+            public int AuthorId { get; set; }
 
             [Display(Name = "Author")]
             public string AuthorName { get; set; } = default!;
