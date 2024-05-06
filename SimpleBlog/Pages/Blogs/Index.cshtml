@@ -4,7 +4,8 @@
 
 @{
     ViewData["Title"] = "Index";
-    int.TryParse(HttpContext.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var currentUserId);
+    var userIdClaim = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    int.TryParse(userIdClaim, out var currentUserId);
 }
 
 <h1>Index</h1>

@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using SimpleBlog.Models;
 
 namespace SimpleBlog.Pages.Blogs
 {
+    [Authorize]
     public class EditModel : PageModel
     {
         private readonly SimpleBlog.Data.SimpleBlogContext _context;
@@ -15,7 +18,9 @@ namespace SimpleBlog.Pages.Blogs
         }
 
         [BindProperty]
-        public Blog Blog { get; set; } = default!;
+        public InputModel Input { get; set; } = default!;
+
+        public OutputModel Output { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -29,20 +34,59 @@ namespace SimpleBlog.Pages.Blogs
             {
                 return NotFound();
             }
-            Blog = blog;
+
+            var userIdClaim = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int.TryParse(userIdClaim, out var currentUserId);
+
+            if (blog.AuthorId != currentUserId)
+            {
+                return Forbid();
+            }
+
+            Output = new OutputModel
+            {
+                Id = blog.Id,
+                CreatedDate = blog.CreatedDate,
+                LastUpdatedDate = blog.LastUpdatedDate,
+            };
+
+            Input = new InputModel { Title = blog.Title, Content = blog.Content };
+
             return Page();
         }
 
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see https://aka.ms/RazorPagesCRUD.
-        public async Task<IActionResult> OnPostAsync()
+        public async Task<IActionResult> OnPostAsync(int? id)
         {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var blog = await _context.Blogs.FirstOrDefaultAsync(m => m.Id == id);
+
+            if (blog == null)
+            {
+                return NotFound();
+            }
+
+            var userIdClaim = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int.TryParse(userIdClaim, out var currentUserId);
+
+            if (blog.AuthorId != currentUserId)
+            {
+                return Forbid();
+            }
+
             if (!ModelState.IsValid)
             {
                 return Page();
             }
 
-            _context.Attach(Blog).State = EntityState.Modified;
+            blog.Title = Input!.Title;
+            blog.Content = Input!.Content;
+            blog.LastUpdatedDate = DateTimeOffset.Now;
+
+            _context.Attach(blog).State = EntityState.Modified;
 
             try
             {
@@ -50,7 +94,7 @@ namespace SimpleBlog.Pages.Blogs
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!BlogExists(Blog.Id))
+                if (!BlogExists(blog.Id))
                 {
                     return NotFound();
                 }
@@ -66,6 +110,26 @@ namespace SimpleBlog.Pages.Blogs
         private bool BlogExists(int id)
         {
             return _context.Blogs.Any(e => e.Id == id);
+        }
+
+        public class InputModel
+        {
+            [Required]
+            public string Title { get; set; } = default!;
+
+            [Required]
+            public string Content { get; set; } = default!;
+        }
+
+        public class OutputModel
+        {
+            public int Id { get; set; }
+
+            [Display(Name = "Created")]
+            public DateTimeOffset CreatedDate { get; set; }
+
+            [Display(Name = "Updated")]
+            public DateTimeOffset? LastUpdatedDate { get; set; }
         }
     }
 }
