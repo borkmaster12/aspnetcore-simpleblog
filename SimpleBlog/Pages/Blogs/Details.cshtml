@@ -33,7 +33,14 @@
             @Html.DisplayNameFor(model => model.Blog.LastUpdatedDate)
         </dt>
         <dd class="col-sm-10">
+        @if (Model.Blog.LastUpdatedDate is null)
+        {
+        <text>Never</text>
+        }
+        else
+        {
             @Html.DisplayFor(model => model.Blog.LastUpdatedDate)
+        }
         </dd>
     </dl>
 </div>

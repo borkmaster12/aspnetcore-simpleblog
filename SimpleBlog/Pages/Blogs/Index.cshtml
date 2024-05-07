@@ -54,7 +54,7 @@
                     }
             </td>
             <td>
-                <a asp-page="./Details" asp-route-id="@item.Id">Details</a> 
+                <a asp-page="./Details" asp-route-id="@item.Id">View</a> 
                 @if (currentUserId == item.AuthorId)
                 {
                 <text> | </text>
@@ -67,3 +67,19 @@
 }
     </tbody>
 </table>
+
+@{
+    var prevDisabled = !Model.Blogs.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.Blogs.HasNextPage ? "disabled" : "";
+}
+
+<a asp-page="./Index"
+   asp-route-pageIndex="@(Model.Blogs.PageIndex - 1)"
+   class="btn btn-primary @prevDisabled">
+    Previous
+</a>
+<a asp-page="./Index"
+   asp-route-pageIndex="@(Model.Blogs.PageIndex + 1)"
+   class="btn btn-primary @nextDisabled">
+    Next
+</a>

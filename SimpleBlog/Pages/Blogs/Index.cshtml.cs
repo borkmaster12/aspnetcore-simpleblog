@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using SimpleBlog.Utilities;
 
 namespace SimpleBlog.Pages.Blogs
 {
@@ -13,22 +14,25 @@ namespace SimpleBlog.Pages.Blogs
             _context = context;
         }
 
-        public IList<OutputModel> Blogs { get; set; } = default!;
+        public PaginatedList<OutputModel> Blogs { get; set; } = default!;
 
-        public async Task OnGetAsync()
+        public async Task OnGetAsync(int? pageIndex)
         {
-            Blogs = await _context
-                .Blogs.Take(10)
-                .Select(blog => new OutputModel
-                {
-                    Id = blog.Id,
-                    AuthorId = blog.AuthorId,
-                    Title = blog.Title,
-                    AuthorName = blog.Author!.UserName ?? string.Empty,
-                    CreatedDate = blog.CreatedDate,
-                    LastUpdatedDate = blog.LastUpdatedDate,
-                })
-                .ToListAsync();
+            var blogsQuery = _context.Blogs.Select(blog => new OutputModel
+            {
+                Id = blog.Id,
+                AuthorId = blog.AuthorId,
+                Title = blog.Title,
+                AuthorName = blog.Author!.UserName ?? string.Empty,
+                CreatedDate = blog.CreatedDate,
+                LastUpdatedDate = blog.LastUpdatedDate,
+            });
+
+            Blogs = await PaginatedList<OutputModel>.CreateAsync(
+                blogsQuery.AsNoTracking(),
+                pageIndex ?? 1,
+                pageSize: 10
+            );
         }
 
         public class OutputModel
