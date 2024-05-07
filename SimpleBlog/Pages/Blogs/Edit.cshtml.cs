@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using SimpleBlog.Contracts.Persistence;
 using SimpleBlog.Extensions;
 
 namespace SimpleBlog.Pages.Blogs
@@ -10,11 +11,11 @@ namespace SimpleBlog.Pages.Blogs
     [Authorize]
     public class EditModel : PageModel
     {
-        private readonly SimpleBlog.Data.SimpleBlogContext _context;
+        private readonly IBlogRepository _blogRepository;
 
-        public EditModel(SimpleBlog.Data.SimpleBlogContext context)
+        public EditModel(IBlogRepository blogRepository)
         {
-            _context = context;
+            _blogRepository = blogRepository;
         }
 
         [BindProperty]
@@ -29,7 +30,7 @@ namespace SimpleBlog.Pages.Blogs
                 return NotFound();
             }
 
-            var blog = await _context.Blogs.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id);
+            var blog = await _blogRepository.GetByIdAsync(id.Value);
             if (blog == null)
             {
                 return NotFound();
@@ -59,7 +60,7 @@ namespace SimpleBlog.Pages.Blogs
                 return NotFound();
             }
 
-            var blog = await _context.Blogs.FirstOrDefaultAsync(m => m.Id == id);
+            var blog = await _blogRepository.GetByIdAsync(id.Value);
 
             if (blog == null)
             {
@@ -80,11 +81,9 @@ namespace SimpleBlog.Pages.Blogs
             blog.Content = Input!.Content;
             blog.LastUpdatedDate = DateTimeOffset.Now;
 
-            _context.Attach(blog).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                await _blogRepository.UpdateAsync(blog);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -103,7 +102,7 @@ namespace SimpleBlog.Pages.Blogs
 
         private bool BlogExists(int id)
         {
-            return _context.Blogs.Any(e => e.Id == id);
+            return _blogRepository.GetByIdAsync(id) is not null;
         }
 
         public class InputModel

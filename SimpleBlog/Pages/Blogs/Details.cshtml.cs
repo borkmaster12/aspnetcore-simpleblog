@@ -1,17 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
+using SimpleBlog.Contracts.Persistence;
 using SimpleBlog.Models;
 
 namespace SimpleBlog.Pages.Blogs
 {
     public class DetailsModel : PageModel
     {
-        private readonly SimpleBlog.Data.SimpleBlogContext _context;
+        private readonly IBlogRepository _blogRepository;
 
-        public DetailsModel(SimpleBlog.Data.SimpleBlogContext context)
+        public DetailsModel(IBlogRepository blogRepository)
         {
-            _context = context;
+            _blogRepository = blogRepository;
         }
 
         public Blog Blog { get; set; } = default!;
@@ -23,7 +23,7 @@ namespace SimpleBlog.Pages.Blogs
                 return NotFound();
             }
 
-            var blog = await _context.Blogs.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id);
+            var blog = await _blogRepository.GetByIdAsync(id.Value);
             if (blog == null)
             {
                 return NotFound();

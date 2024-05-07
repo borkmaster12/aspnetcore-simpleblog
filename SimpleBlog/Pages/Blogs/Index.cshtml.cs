@@ -1,24 +1,26 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
+using SimpleBlog.Contracts.Persistence;
 using SimpleBlog.Utilities;
 
 namespace SimpleBlog.Pages.Blogs
 {
     public class IndexModel : PageModel
     {
-        private readonly SimpleBlog.Data.SimpleBlogContext _context;
+        private readonly IBlogRepository _blogRepository;
 
-        public IndexModel(SimpleBlog.Data.SimpleBlogContext context)
+        public IndexModel(IBlogRepository blogRepository)
         {
-            _context = context;
+            _blogRepository = blogRepository;
         }
 
         public PaginatedList<OutputModel> Blogs { get; set; } = default!;
 
-        public async Task OnGetAsync(int? pageIndex)
+        public async Task OnGetAsync(int pageIndex = 1)
         {
-            var blogsQuery = _context.Blogs.Select(blog => new OutputModel
+            var pageSize = 10;
+            var blogs = await _blogRepository.GetPagedListAsync(pageIndex, pageSize);
+            var output = blogs.Select(blog => new OutputModel
             {
                 Id = blog.Id,
                 AuthorId = blog.AuthorId,
@@ -28,11 +30,7 @@ namespace SimpleBlog.Pages.Blogs
                 LastUpdatedDate = blog.LastUpdatedDate,
             });
 
-            Blogs = await PaginatedList<OutputModel>.CreateAsync(
-                blogsQuery.AsNoTracking(),
-                pageIndex ?? 1,
-                pageSize: 10
-            );
+            Blogs = new PaginatedList<OutputModel>(output, blogs.TotalPages, pageIndex, pageSize);
         }
 
         public class OutputModel

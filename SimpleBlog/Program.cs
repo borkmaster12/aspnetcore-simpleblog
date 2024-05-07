@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using SimpleBlog.Contracts.Persistence;
 using SimpleBlog.Data;
+using SimpleBlog.Data.Repositories;
 using SimpleBlog.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +25,8 @@ builder.Services.AddDbContext<SimpleBlogContext>(options =>
 builder
     .Services.AddDefaultIdentity<BlogUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<SimpleBlogContext>();
+
+builder.Services.AddScoped<IBlogRepository, BlogRepository>();
 
 var app = builder.Build();
 

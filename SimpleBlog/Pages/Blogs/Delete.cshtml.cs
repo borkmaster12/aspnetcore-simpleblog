@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
+using SimpleBlog.Contracts.Persistence;
 using SimpleBlog.Extensions;
 using SimpleBlog.Models;
 
@@ -10,11 +10,11 @@ namespace SimpleBlog.Pages.Blogs
     [Authorize]
     public class DeleteModel : PageModel
     {
-        private readonly SimpleBlog.Data.SimpleBlogContext _context;
+        private readonly IBlogRepository _blogRepository;
 
-        public DeleteModel(SimpleBlog.Data.SimpleBlogContext context)
+        public DeleteModel(IBlogRepository blogRepository)
         {
-            _context = context;
+            _blogRepository = blogRepository;
         }
 
         [BindProperty]
@@ -27,7 +27,7 @@ namespace SimpleBlog.Pages.Blogs
                 return NotFound();
             }
 
-            var blog = await _context.Blogs.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id);
+            var blog = await _blogRepository.GetByIdAsync(id.Value);
 
             if (blog == null)
             {
@@ -50,7 +50,7 @@ namespace SimpleBlog.Pages.Blogs
                 return NotFound();
             }
 
-            var blog = await _context.Blogs.FindAsync(id);
+            var blog = await _blogRepository.GetByIdAsync(id.Value);
 
             if (blog == null)
             {
@@ -63,8 +63,7 @@ namespace SimpleBlog.Pages.Blogs
             }
 
             Blog = blog;
-            _context.Blogs.Remove(Blog);
-            await _context.SaveChangesAsync();
+            await _blogRepository.DeleteAsync(Blog);
 
             return RedirectToPage("./Index");
         }

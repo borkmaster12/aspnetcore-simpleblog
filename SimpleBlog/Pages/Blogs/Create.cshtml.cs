@@ -3,6 +3,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SimpleBlog.Contracts.Persistence;
 using SimpleBlog.Models;
 
 namespace SimpleBlog.Pages.Blogs
@@ -10,11 +11,11 @@ namespace SimpleBlog.Pages.Blogs
     [Authorize]
     public class CreateModel : PageModel
     {
-        private readonly SimpleBlog.Data.SimpleBlogContext _context;
+        private readonly IBlogRepository _blogRepository;
 
-        public CreateModel(SimpleBlog.Data.SimpleBlogContext context)
+        public CreateModel(IBlogRepository blogRepository)
         {
-            _context = context;
+            _blogRepository = blogRepository;
         }
 
         [BindProperty]
@@ -43,8 +44,7 @@ namespace SimpleBlog.Pages.Blogs
                 CreatedDate = DateTimeOffset.Now
             };
 
-            _context.Blogs.Add(Blog);
-            await _context.SaveChangesAsync();
+            await _blogRepository.AddAsync(Blog);
 
             return RedirectToPage("./Index");
         }
