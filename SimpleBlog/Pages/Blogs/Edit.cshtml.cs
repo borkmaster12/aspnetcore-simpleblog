@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using SimpleBlog.Extensions;
 
 namespace SimpleBlog.Pages.Blogs
 {
@@ -35,10 +35,7 @@ namespace SimpleBlog.Pages.Blogs
                 return NotFound();
             }
 
-            var userIdClaim = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            int.TryParse(userIdClaim, out var currentUserId);
-
-            if (blog.AuthorId != currentUserId)
+            if (blog.AuthorId != User.GetUserId())
             {
                 return Forbid();
             }
@@ -69,10 +66,7 @@ namespace SimpleBlog.Pages.Blogs
                 return NotFound();
             }
 
-            var userIdClaim = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            int.TryParse(userIdClaim, out var currentUserId);
-
-            if (blog.AuthorId != currentUserId)
+            if (blog.AuthorId != User.GetUserId())
             {
                 return Forbid();
             }
